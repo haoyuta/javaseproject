@@ -86,7 +86,7 @@ public final class UserUtil {
             }
         }
         try (FileReader fileReader=new FileReader(file)) {
-            char[] chars=new char[100];
+            char[] chars=new char[1024];
             int len;
             while ((len=fileReader.read(chars))!=-1){
                 //解码输出

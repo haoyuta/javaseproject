@@ -7,6 +7,7 @@ import util.UserUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -55,7 +56,9 @@ public class DouDou5GImpl implements DouDou5G {
                 //通话时间大于通话剩余时长
                 if(callingMin>talkTime){
                     //消费费用
-                    double callPay=(callingMin-talkTime)*0.2;
+                    double callPay= new BigDecimal((callingMin-talkTime)*0.2).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
+
+
                     //扣除相应费用,并赋值
                     loginUser.setBalance(loginUser.getBalance()-callPay);
                     loginUser.setTalkTime(0);
@@ -92,7 +95,8 @@ public class DouDou5GImpl implements DouDou5G {
                 Integer callingMin = calling();
                 System.out.println("通话结束，当前与"+otherPhone+"的通话时长为:"+callingMin+"分钟");
                 //消费费用
-                double callPay=callingMin*0.2;
+                double callPay= new BigDecimal(callingMin*0.2).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();;
+
                 //直接扣除费用,并赋值
                 loginUser.setBalance(loginUser.getBalance()-callPay);
                 System.out.println("本次共消费:"+callPay+"元！");
@@ -159,15 +163,15 @@ public class DouDou5GImpl implements DouDou5G {
             //先获取登录用户接收方信息集合
             List<String> message = loginUser.getMessage();
 
-        //设置发送给接收方的信息
-       BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
-            System.out.print("请输入要发送给"+otherPhone+"号主的信息:");
-        try {
-            message.add(reader.readLine());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        loginUser.setMessage(message);
+            //设置发送给接收方的信息
+           BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
+                System.out.print("请输入要发送给"+otherPhone+"号主的信息:");
+            try {
+                message.add(reader.readLine());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            loginUser.setMessage(message);
 
             //消息发送完之后开始计费
             //获取用户的短信条数
@@ -177,12 +181,14 @@ public class DouDou5GImpl implements DouDou5G {
                 loginUser.setMesNum(mesNum-1);
             }else {
                 //扣除费用
-                loginUser.setBalance(loginUser.getBalance()-0.1);
+                loginUser.setBalance(new BigDecimal(loginUser.getBalance()-0.1).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue());
+
                 //记录消费
-                loginUser.setTotalExp(loginUser.getTotalExp()+0.1);
+                loginUser.setTotalExp(new BigDecimal(loginUser.getBalance()+0.1).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue());
+
 
                 //添加消费消息
-                String expenseMes="向"+otherPhoneNum+"号机主发送了一条短信，消费0.1元";
+                String expenseMes="向"+otherPhone+"号机主发送了一条短信，消费0.1元";
                 try {
                     UserUtil.writeFile(Cons.FILE_EXPEND+loginUser.getUsername()+".txt",expenseMes);
                 } catch (IOException e) {
